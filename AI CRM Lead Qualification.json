@@ -1,0 +1,441 @@
+{
+  "name": "AI CRM Lead Qualification",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Customer Care ",
+        "formDescription": "check your email for confirmation of submisson",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name "
+            },
+            {
+              "fieldLabel": "Company"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "what service they need",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "65468413-f698-45bf-95f1-42819126ace8",
+      "name": "On form submission",
+      "webhookId": "46679f6a-1a67-430c-ae7e-07a97fb5cb59"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Lead Qualification AI.\n\nAnalyze the lead information and return ONLY valid JSON.\n\nLead Information:\n\nName: {{ $json['Name '] }}\nCompany: {{ $json.Company }}\nRequirement: {{ $json['what service they need'] }}\nScoring Rules:\n\n* Large company + clear requirement + buying intent = High Score\n* Small business + moderate interest = Medium Score\n* Students, learners, researchers, or unclear intent = Low Score\n\nReturn exactly this format:\n\n{\n\"lead_score\": 95,\n\"lead_quality\": \"High\",\n\"category\": \"Customer Support Automation\",\n\"reason\": \"Large company with strong buying intent and urgent requirement.\"\n}\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "03f5fa80-01b1-480f-9499-aa1cb1e5721c",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        224
+      ],
+      "id": "4ddb2d6d-300e-4f98-ac21-158cdf304898",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0TP9NHItBWnsrDSL",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8d0632b0-75c6-4cb2-b88a-57b2b0468b8a",
+              "leftValue": "={{ Number($json.lead_score) }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        928,
+        0
+      ],
+      "id": "124395c2-5685-434a-9931-8af1ea3d2d39",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b010c52e-dbd8-4734-a926-65b9597fdeb2",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "37241d19-7869-4cb0-8eb6-241f59ee887e",
+              "name": "lead_score",
+              "value": "={{ JSON.parse($json.output).lead_score }}",
+              "type": "string"
+            },
+            {
+              "id": "4386fa4b-7cb7-4451-b562-97b7e52decc9",
+              "name": "=lead_quality",
+              "value": "={{ JSON.parse($json.output).lead_quality }}",
+              "type": "string"
+            },
+            {
+              "id": "4d0e976e-d943-47f3-8f59-d6bb56f35264",
+              "name": "Category",
+              "value": "={{ JSON.parse($json.output).category }}",
+              "type": "string"
+            },
+            {
+              "id": "8a9af951-1a40-44ef-b67c-c684c77b802f",
+              "name": "Reason",
+              "value": "={{ JSON.parse($json.output).reason }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        0
+      ],
+      "id": "a283c32a-ee8c-494a-b87e-80155e8ca1d1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1PPewqegVb3FW4T-7bZTUB4GlIsAk8_zVgltovuKkakw",
+          "mode": "list",
+          "cachedResultName": "ai crm lead ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PPewqegVb3FW4T-7bZTUB4GlIsAk8_zVgltovuKkakw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 547417052,
+          "mode": "list",
+          "cachedResultName": "Sheet3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PPewqegVb3FW4T-7bZTUB4GlIsAk8_zVgltovuKkakw/edit#gid=547417052"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('On form submission').item.json['Name '] }}",
+            "Company": "={{ $('On form submission').item.json.Company }}",
+            "Email": "={{ $('On form submission').item.json.Email }}",
+            "What service they need": "={{ $('On form submission').item.json['what service they need'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "What service they need",
+              "displayName": "What service they need",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1136,
+        -144
+      ],
+      "id": "0e9612a8-2b59-4a2c-8ccf-8e072da13a4f",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tSGDlO00KmBIxeGE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "6056002874",
+        "text": "=Name :{{ $('On form submission').item.json['Name '] }}\nCompany :{{ $('On form submission').item.json.Company }}\nEmail :{{ $('On form submission').item.json.Email }}\nWhat service they need :{{ $('On form submission').item.json['what service they need'] }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1344,
+        -144
+      ],
+      "id": "3a5490f8-adc3-4de3-817f-7e031143b8e5",
+      "name": "Send a text message",
+      "webhookId": "efcdb1a0-db85-4c2d-9dfe-99f9a9ee89e3",
+      "credentials": {
+        "telegramApi": {
+          "id": "bRU6hVpElFDTr4AQ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1PPewqegVb3FW4T-7bZTUB4GlIsAk8_zVgltovuKkakw",
+          "mode": "list",
+          "cachedResultName": "ai crm lead ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PPewqegVb3FW4T-7bZTUB4GlIsAk8_zVgltovuKkakw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1074545487,
+          "mode": "list",
+          "cachedResultName": "Sheet4",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1PPewqegVb3FW4T-7bZTUB4GlIsAk8_zVgltovuKkakw/edit#gid=1074545487"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('On form submission').item.json['Name '] }}",
+            "Company": "={{ $('On form submission').item.json.Company }}",
+            "Email": "={{ $('On form submission').item.json.Email }}",
+            "What service they need": "={{ $('On form submission').item.json['what service they need'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "What service they need",
+              "displayName": "What service they need",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1136,
+        96
+      ],
+      "id": "8c983153-f447-4b94-8f4e-8e1410cbfdba",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tSGDlO00KmBIxeGE",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "efeed37b-8c57-4718-9aec-404b30b673dc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "24664926539d9915bc2d8860a47745f08713c1dc9b1016549615bf9cd17833dd"
+  },
+  "id": "tSe8rmnzN1PVnYN1",
+  "tags": []
+}
